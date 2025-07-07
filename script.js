@@ -26,6 +26,16 @@ let answers = [];
 let screens = [];
 let fazitIndices = {};
 let plantPositions = {};
+let fireAnimationIntervals = {};
+
+const fireFrames = {
+    1: new Image(),
+    2: new Image()
+};
+
+fireFrames[1].src = "images/fire1.PNG";
+fireFrames[2].src = "images/fire2.png";
+
 
 // === Screens aufbauen ===
 function buildScreens() {
@@ -63,6 +73,26 @@ function calculatePlantPosition(sectionName, stepIndex) {
     plantContainers[sectionName].style.left = plantPositions[sectionName] + 'px';
 }
 
+function startFireAnimation(section) {
+    const fireElement = fires[section];
+    if (!fireElement || fireAnimationIntervals[section]) return;
+
+    let frame = 1;
+    fireElement.src = fireFrames[frame].src;
+
+    fireAnimationIntervals[section] = setInterval(() => {
+        frame = frame === 1 ? 2 : 1;
+        fireElement.src = fireFrames[frame].src;
+    }, 200);
+}
+
+function stopFireAnimation(section) {
+    if (fireAnimationIntervals[section]) {
+        clearInterval(fireAnimationIntervals[section]);
+        delete fireAnimationIntervals[section];
+    }
+}
+
 function render() {
     content.classList.remove('show');
     setTimeout(() => {
@@ -83,8 +113,10 @@ function render() {
             // Feuer nur beim eigenen Fazit
             if (screen.type === 'fazit' && screen.section === name) {
                 fires[name].style.display = 'block';
+                startFireAnimation(name);
             } else {
                 fires[name].style.display = 'none';
+                stopFireAnimation(name);
             }
         });
 
@@ -127,9 +159,14 @@ function render() {
             content.innerHTML = `
           <h2>Zwischenfazit – ${screen.section}</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-          <button class="button" id="next">Weiter</button>
+          <div>
+            ${currentStep > 0 ? '<button class="button" id="back">Zurück</button>' : ''}
+            <button class="button" id="next">Weiter</button>
+          </div>
         `;
             document.getElementById('next').onclick = () => next();
+            if (document.getElementById('back'))
+                document.getElementById('back').onclick = () => back();
         }
         else if (screen.type === 'result') {
             const score = answers.reduce((a, b) => a + (b || 0), 0);
