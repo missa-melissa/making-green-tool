@@ -1,10 +1,20 @@
 Bitte erstelle eine vollständige HTML-Datei (inkl. CSS und JavaScript), die ich als index.html speichern und offline im Browser öffnen kann.
 
 Ziele und Funktionalität:
-- Die Seite soll ein mehrstufiges Formular mit „Weiter“ und „Zurück“-Navigation enthalten.
-- Jede Stufe zeigt genau eine Frage mit drei Radio-Optionen: „Ja“, „Nein“, „Keine Aussage“.
-- Die Fragen sind in drei klar erkennbaren Hauptbereichen (Sektionen) organisiert: Ökologie, Soziales, Ökonomie.
-- Auf jeder Seite/Frage soll deutlich sichtbar sein, in welchem Abschnitt man sich gerade befindet (Überschrift).
+
+Die Seite soll ein mehrstufiges Formular mit „Weiter“ und „Zurück“-Navigation enthalten.
+
+Jede Stufe zeigt genau eine Frage mit drei Radio-Optionen: „Ja“, „Nein“, „Keine Aussage“.
+
+Die Fragen sind in drei klar erkennbaren Hauptbereichen (Sektionen) organisiert: Ökologie, Soziales, Ökonomie.
+
+Auf jeder Seite/Frage soll deutlich sichtbar sein, in welchem Abschnitt man sich gerade befindet (Überschrift).
+
+Zusätzliche Inhalte:
+
+Vor dem Start des Formulars soll ein Einleitungstext angezeigt werden, aktuell einfach mit Lorem Ipsum gefüllt. Dieser Teil wird vor dem Fragebogen angezeigt und muss mit einem „Start“-Button in den Fragebogen übergehen.
+
+Zwischen den drei Abschnitten (Ökologie, Soziales, Ökonomie) soll jeweils ein Zwischenfazit-Text angezeigt werden (ebenfalls aktuell mit Lorem Ipsum gefüllt), bevor der nächste Block von Fragen startet. Diese Zwischenfazit-Seiten brauchen einen eigenen Screen/Seite im Ablauf mit „Weiter“-Button.
 
 Fragen pro Abschnitt:
 
@@ -58,30 +68,82 @@ SOZIALES:
 - Werden Informationen für die Öffentlichkeit zu Themen der Nachhaltigkeit transparent zur Verfügung gestellt?
 - Gibt es ein regelmäßiges Monitoring und eine Weiterentwicklung der Nachhaltigkeitsstrategie des Unternehmens?
 - Hat das Unternehmen eine Nachhaltigkeitsstrategie mit konkreten Zielen?
-
 Scoring-Regeln:
-- „Ja“ = +1 Punkt
-- „Nein“ = -1 Punkt
-- „Keine Aussage“ = 0 Punkte
-- Alle Fragen haben Gewichtung 1
-- Gesamtscore = Summe aller Punkte aus allen Fragen
+
+„Ja“ = +1 Punkt
+
+„Nein“ = -1 Punkt
+
+„Keine Aussage“ = 0 Punkte
+
+Alle Fragen haben Gewichtung 1
+
+Gesamtscore = Summe aller Punkte aus allen Fragen
 
 Bewertungsskala (dynamisch, anpassbar an Anzahl Fragen):
-- Rot (sehr schlecht): min bis 0
-- Orange (schlecht): 1–10
-- Gelb (mittel): 11–20
-- Hellgrün (gut): 21–30
-- Grün (exzellent): 31 bis Max (Summe aller Fragen)
+
+Rot (sehr schlecht): min bis 0
+
+Orange (schlecht): 1–10
+
+Gelb (mittel): 11–20
+
+Hellgrün (gut): 21–30
+
+Grün (exzellent): 31 bis Max (Summe aller Fragen)
 
 Farbschema:
-- Hintergrundfarbe der Seite: #FCF6DE
-- Akzentfarbe für Buttons und Überschriften: #ADCA78
-- Weitere Farben sollen harmonisch dazu passen (Beige-, Grüntöne)
-- Bewertungsanzeige mit passender Farbe und Text (z. B. „Score: 23 Punkte – Bewertung: gut“)
+
+Hintergrundfarbe der Seite: #FCF6DE
+
+Akzentfarbe für Buttons und Überschriften: #ADCA78
+
+Weitere Farben sollen harmonisch dazu passen (Beige-, Grüntöne)
+
+Bewertungsanzeige mit passender Farbe und Text (z. B. „Score: 23 Punkte – Bewertung: gut“)
 
 Design:
-- Modernes, sauberes und responsives Layout
-- Sanfte Fade-Animationen beim Wechsel der Fragen
-- Am Ende eine klare Ergebnisanzeige im Stil einer Skala (wie ein Gauge oder Tachometer möglich), die zeigt, in welchem Bereich der Score liegt, inklusive Farbe und Text.
 
-Bitte gib den vollständigen HTML-Code mit eingebettetem CSS (im style-Tag) und JavaScript (im script-Tag) zurück.
+Modernes, sauberes und responsives Layout
+
+Sanfte Fade-Animationen beim Wechsel der Fragen
+
+Am Ende eine klare Ergebnisanzeige im Stil einer Skala (wie ein Gauge oder Tachometer möglich), die zeigt, in welchem Bereich der Score liegt, inklusive Farbe und Text.
+
+Ergänzungen für Hintergrundgestaltung und Fortschrittsanzeige:
+
+Verwende ein Bild background.jpg als Hintergrund der Seite, das unten am Viewport ausgerichtet ist und sich in der Breite wiederholt (repeat-x).
+
+Das Hintergrundbild soll immer ca. 50 % der Höhe des Viewports ausfüllen, ohne verzerrt zu werden (kein Stauchen/Strecken). Der obere Bereich der Seite soll dabei die Hintergrundfarbe (#FCF6DE) behalten. Das Bild soll auch beim Scrollen immer unten bleiben (z. B. background-attachment: fixed).
+
+Zusätzlich soll ein Boot-Bild boot.png ebenfalls unten auf der Seite fixiert angezeigt werden.
+
+Das Boot soll den Fortschritt im Formular anzeigen: Bei Frage 1 steht es ganz links, bei der letzten Frage ganz rechts. Mit jedem Klick auf „Weiter“ soll es flüssig (sanft animiert) nach rechts wandern, sodass der Fortschritt sichtbar wird.
+
+Die horizontale Position des Boots soll dabei anhand des Fortschritts (aktueller Schritt geteilt durch Anzahl Fragen) berechnet werden.
+
+Das Boot-Bild soll dabei fix 300 px breit sein (unabhängig von Bildschirmgröße oder Gerät) und sich responsive unten auf dem Hintergrundbild bewegen.
+
+Die Position soll sich auch beim Resizen des Browserfensters korrekt neu berechnen.
+
+Zusammengefasst sollen folgende Screens im Ablauf enthalten sein:
+
+Einleitungsscreen mit Lorem Ipsum-Text und „Start“-Button
+
+Fragen des Bereichs Ökologie
+
+Zwischenfazit-Screen (Lorem Ipsum) nach Ökologie
+
+Fragen des Bereichs Soziales
+
+Zwischenfazit-Screen (Lorem Ipsum) nach Soziales
+
+Fragen des Bereichs Ökonomie
+
+Ergebnisseite mit Gauge/Tacho, Bewertung und Score-Text
+
+Bitte gib den vollständigen HTML-Code mit eingebettetem CSS (im <style>-Tag) und JavaScript (im <script>-Tag) zurück, sodass ich die Datei direkt als index.html speichern und offline im Browser öffnen kann.
+
+Hinweis:
+Bitte im Code die Bildpfade so anlegen, dass background.jpg und boot.png einfach im gleichen Verzeichnis wie die index.html liegen und direkt genutzt werden können.
+Alle Funktionen, Fragen, Texte und Screens wie beschrieben vollständig und funktionsfähig umsetzen.
