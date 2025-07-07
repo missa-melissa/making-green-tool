@@ -119,6 +119,16 @@ p {
     left: 0;
     width: 100%;
     display: none;
+    pointer-events: none;
+}
+
+.fire-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.1s linear;
 }
 
 .result-gauge {

@@ -74,24 +74,37 @@ function calculatePlantPosition(sectionName, stepIndex) {
 }
 
 function startFireAnimation(section) {
-    const fireElement = fires[section];
-    if (!fireElement || fireAnimationIntervals[section]) return;
+    const fireDiv = fires[section];
+    if (!fireDiv || fireAnimationIntervals[section]) return;
 
-    let frame = 1;
-    fireElement.src = fireFrames[frame].src;
+    fireDiv.style.display = 'block';
+
+    const frame1 = fireDiv.querySelector('.frame1');
+    const frame2 = fireDiv.querySelector('.frame2');
+    let showFirst = true;
+
+    // Erstzustand
+    frame1.style.opacity = 1;
+    frame2.style.opacity = 0;
 
     fireAnimationIntervals[section] = setInterval(() => {
-        frame = frame === 1 ? 2 : 1;
-        fireElement.src = fireFrames[frame].src;
+        showFirst = !showFirst;
+        frame1.style.opacity = showFirst ? 1 : 0;
+        frame2.style.opacity = showFirst ? 0 : 1;
     }, 200);
 }
 
 function stopFireAnimation(section) {
+    const fireDiv = fires[section];
     if (fireAnimationIntervals[section]) {
         clearInterval(fireAnimationIntervals[section]);
         delete fireAnimationIntervals[section];
     }
+    if (fireDiv) {
+        fireDiv.style.display = 'none';
+    }
 }
+
 
 function render() {
     content.classList.remove('show');
