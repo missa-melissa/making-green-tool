@@ -31,6 +31,7 @@ body {
     padding: 2rem;
     background-color: rgba(252, 246, 222, 0.95);
     box-sizing: border-box;
+    z-index: 15;
 }
 
 h1, h2 {
@@ -158,6 +159,58 @@ p {
     font-size: 1.2rem;
     font-weight: bold;
 }
+
+.question-text {
+    background-color: var(--accent-color);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 1rem 0;
+}
+
+.importance-question {
+    margin: 2rem 0;
+}
+
+.likert-bar {
+    display: flex;
+    border: 2px solid var(--accent-color);
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 250px;
+    margin: 1rem 0;   /* statt auto -> kein zentrieren mehr */
+}
+
+.bar-option {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+}
+
+.bar-option input[type="radio"] {
+    display: none;
+}
+
+.bar-option span {
+    display: block;
+    padding: 0.5rem 0;
+    background-color: var(--beige);
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.bar-option:hover span {
+    background-color: #e0dabd;
+}
+
+.bar-option input[type="radio"]:checked + span {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+
 
 @media (max-width: 600px) {
     #boot {

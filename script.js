@@ -36,21 +36,32 @@ const fireFrames = {
 fireFrames[1].src = "images/fire1.PNG";
 fireFrames[2].src = "images/fire2.png";
 
+let questionSubStep = 0;
+let currentQuestionState = {};
+
 
 // === Screens aufbauen ===
 function buildScreens() {
-    screens.push({ type: 'intro' });
+    screens.push({type: 'intro'});
     sections.forEach((section, idx) => {
-        section.questions.forEach(q => screens.push({ type: 'question', section: section.name, text: q }));
-        screens.push({ type: 'fazit', section: section.name });
+        section.questions.forEach(q => screens.push({type: 'question', section: section.name, text: q}));
+        screens.push({type: 'fazit', section: section.name});
     });
-    screens.push({ type: 'result' });
+    screens.push({type: 'result'});
 }
 
 function findFazitIndices() {
     sections.forEach(section => {
         const idx = screens.findIndex(s => s.type === 'fazit' && s.section === section.name);
         fazitIndices[section.name] = idx;
+    });
+}
+
+function findSectionEndIndices() {
+    sections.forEach((section, idx) => {
+        let lastIndex;
+        lastIndex = screens.findIndex(s => s.type === 'fazit' && s.section === section.name);
+        sectionEndIndices[section.name] = lastIndex;
     });
 }
 
@@ -83,7 +94,6 @@ function startFireAnimation(section) {
     const frame2 = fireDiv.querySelector('.frame2');
     let showFirst = true;
 
-    // Erstzustand
     frame1.style.opacity = 1;
     frame2.style.opacity = 0;
 
@@ -105,7 +115,6 @@ function stopFireAnimation(section) {
     }
 }
 
-
 function render() {
     content.classList.remove('show');
     setTimeout(() => {
@@ -117,13 +126,12 @@ function render() {
             const name = section.name;
             let img;
             if (currentStep <= sectionEndIndices[name]) {
-                img = `images/plant${idx+1}_blooms.png`;
+                img = `images/plant${idx + 1}_blooms.png`;
             } else {
-                img = `images/plant${idx+1}_died.PNG`;
+                img = `images/plant${idx + 1}_died.PNG`;
             }
             plantImages[name].src = img;
 
-            // Feuer nur beim eigenen Fazit
             if (screen.type === 'fazit' && screen.section === name) {
                 fires[name].style.display = 'block';
                 startFireAnimation(name);
@@ -136,73 +144,38 @@ function render() {
         // === Screens ===
         if (screen.type === 'intro') {
             content.innerHTML = `
-          <h1>Willkommen zum Nachhaltigkeitsfragebogen</h1>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-          <button class="button" id="start">Start</button>
-        `;
+                <h1>Willkommen zum Nachhaltigkeitsfragebogen</h1>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                <button class="button" id="start">Start</button>
+            `;
             document.getElementById('start').onclick = () => next();
-        }
-        else if (screen.type === 'question') {
+        } else if (screen.type === 'question') {
+            renderQuestionScreen(screen);
+        } else if (screen.type === 'fazit') {
             content.innerHTML = `
-          <h2>${screen.section}</h2>
-          <p>${screen.text}</p>
-          <div class="options">
-            <label><input type="radio" name="answer" value="1"> Ja</label>
-            <label><input type="radio" name="answer" value="-1"> Nein</label>
-            <label><input type="radio" name="answer" value="0"> Keine Aussage</label>
-          </div>
-          <div>
-            ${currentStep > 0 ? '<button class="button" id="back">Zurück</button>' : ''}
-            <button class="button" id="next">Weiter</button>
-          </div>
-        `;
-            document.getElementById('next').onclick = () => {
-                const val = document.querySelector('input[name="answer"]:checked');
-                if (val) {
-                    answers[currentStep] = parseInt(val.value);
-                    next();
-                } else {
-                    alert('Bitte eine Option wählen.');
-                }
-            };
-            if (document.getElementById('back'))
-                document.getElementById('back').onclick = () => back();
-        }
-        else if (screen.type === 'fazit') {
-            content.innerHTML = `
-          <h2>Zwischenfazit – ${screen.section}</h2>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-          <div>
-            ${currentStep > 0 ? '<button class="button" id="back">Zurück</button>' : ''}
-            <button class="button" id="next">Weiter</button>
-          </div>
-        `;
+                <h2>Zwischenfazit – ${screen.section}</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                <div>
+                    ${currentStep > 0 ? '<button class="button" id="back">Zurück</button>' : ''}
+                    <button class="button" id="next">Weiter</button>
+                </div>
+            `;
             document.getElementById('next').onclick = () => next();
             if (document.getElementById('back'))
                 document.getElementById('back').onclick = () => back();
-        }
-        else if (screen.type === 'result') {
-            const score = answers.reduce((a, b) => a + (b || 0), 0);
-            const maxScore = answers.length;
-            let rating = '';
-            let color = '';
-            if (score <= 0) { rating = 'sehr schlecht'; color = 'red'; }
-            else if (score <= 10) { rating = 'schlecht'; color = 'orange'; }
-            else if (score <= 20) { rating = 'mittel'; color = 'yellow'; }
-            else if (score <= 30) { rating = 'gut'; color = '#ADCA78'; }
-            else { rating = 'exzellent'; color = 'green'; }
-
-            const degree = Math.min(180, Math.max(0, score / maxScore * 180));
+        } else if (screen.type === 'result') {
+            let totalPossible = 0;
+            let totalEarned = 0;
+            answers.forEach(a => {
+                totalPossible += a.pointsPossible;
+                totalEarned += a.pointsEarned;
+            });
+            const percent = totalPossible > 0 ? ((totalEarned / totalPossible) * 100).toFixed(1) : 0;
             content.innerHTML = `
-          <h1>Ergebnis</h1>
-          <div class="result-gauge">
-            <div class="needle" id="needle"></div>
-          </div>
-          <div class="result-text" style="color:${color}">Score: ${score} Punkte – Bewertung: ${rating}</div>
-        `;
-            setTimeout(() => {
-                document.getElementById('needle').style.transform = 'rotate(' + degree + 'deg)';
-            }, 100);
+                <h1>Ergebnis</h1>
+                <p>Erreichte Punkte: ${totalEarned} von ${totalPossible}</p>
+                <p>Score: ${percent}%</p>
+            `;
         }
 
         content.classList.add('show');
@@ -217,25 +190,176 @@ function updateBootPosition() {
     const bootWidth = boot.offsetWidth;
     const left = progress * (containerWidth - bootWidth);
     boot.style.left = left + 'px';
+}
 
-    // Pflanzen bleiben fix an ihren Positionen
-    for (let section of sections) {
-        plantContainers[section.name].style.left = plantPositions[section.name] + 'px';
+function renderQuestionScreen(screen) {
+    content.innerHTML = `
+    <h2>${screen.section}</h2>
+    <p class="question-text">${screen.text}</p>
+    
+    <div class="importance-question">
+      <p><strong>Wie relevant ist diese Frage?</strong></p>
+      <div class="likert-bar">
+        <label class="bar-option">
+          <input type="radio" name="importance" value="0">
+          <span>0</span>
+        </label>
+        <label class="bar-option">
+          <input type="radio" name="importance" value="1">
+          <span>1</span>
+        </label>
+        <label class="bar-option">
+          <input type="radio" name="importance" value="2">
+          <span>2</span>
+        </label>
+        <label class="bar-option">
+          <input type="radio" name="importance" value="3">
+          <span>3</span>
+        </label>
+      </div>
+    </div>
+
+    <p><strong>Wie lautet deine Antwort?</strong></p>
+    <div class="options">
+      <label><input type="radio" name="answer" value="yes"> Ja</label>
+      <label><input type="radio" name="answer" value="no"> Nein</label>
+      <label><input type="radio" name="answer" value="unknown"> Keine Aussage</label>
+    </div>
+
+    <div id="concealment-block" style="display:none; margin-top:1rem;">
+      <p><strong>Wurden die Informationen absichtlich verschleiert?</strong></p>
+      <div class="options">
+        <label><input type="radio" name="concealment" value="yes"> Ja</label>
+        <label><input type="radio" name="concealment" value="no"> Nein</label>
+      </div>
+    </div>
+
+    <div style="margin-top:1rem;">
+      ${currentStep > 0 ? '<button class="button" id="back">Zurück</button>' : ''}
+      <button class="button" id="next">Weiter</button>
+    </div>
+  `;
+
+    // Event: Zusatzfrage nur zeigen wenn "Keine Aussage" gewählt
+    document.querySelectorAll('input[name="answer"]').forEach(el => {
+        el.addEventListener('change', (e) => {
+            const concealmentBlock = document.getElementById('concealment-block');
+            if (e.target.value === 'unknown') {
+                concealmentBlock.style.display = 'block';
+            } else {
+                concealmentBlock.style.display = 'none';
+            }
+        });
+    });
+
+    if (document.getElementById('back')) {
+        document.getElementById('back').onclick = () => back();
+    }
+
+    document.getElementById('next').onclick = () => {
+        // Abfragen aller Werte
+        const importanceEl = document.querySelector('input[name="importance"]:checked');
+        const answerEl = document.querySelector('input[name="answer"]:checked');
+
+        if (!importanceEl) {
+            alert('Bitte eine Relevanz wählen.');
+            return;
+        }
+        const importance = parseInt(importanceEl.value);
+        if (importance === 0) {
+            // Frage fällt raus
+            saveAnswer({
+                question: screen.text,
+                importance,
+                answer: null,
+                concealment: null,
+                pointsPossible: 0,
+                pointsEarned: 0
+            });
+            next();
+            return;
+        }
+
+        if (!answerEl) {
+            alert('Bitte eine Antwort wählen.');
+            return;
+        }
+        const answer = answerEl.value;
+
+        let concealment = null;
+        if (answer === 'unknown') {
+            const concealmentEl = document.querySelector('input[name="concealment"]:checked');
+            if (!concealmentEl) {
+                alert('Bitte beantworten Sie die Verschleierungsfrage.');
+                return;
+            }
+            concealment = (concealmentEl.value === 'yes');
+        }
+
+        // Punkteberechnung
+        let pointsPossible = 0;
+        let pointsEarned = 0;
+        if (answer === 'yes') {
+            pointsPossible = importance;
+            pointsEarned = importance;
+        } else if (answer === 'no') {
+            pointsPossible = importance;
+            pointsEarned = 0;
+        } else if (answer === 'unknown') {
+            if (concealment) {
+                pointsPossible = importance;
+                pointsEarned = 0;
+            } else {
+                // nicht absichtlich verschleiert → fällt raus
+                pointsPossible = 0;
+                pointsEarned = 0;
+            }
+        }
+
+        saveAnswer({
+            question: screen.text,
+            importance,
+            answer,
+            concealment,
+            pointsPossible,
+            pointsEarned
+        });
+
+        next();
+    };
+
+    // ---- Restore previous answers if they exist ----
+    const saved = answers[currentStep];
+
+    if (saved) {
+        // Pre-select importance
+        if (saved.importance !== null) {
+            const impEl = document.querySelector(`input[name="importance"][value="${saved.importance}"]`);
+            if (impEl) impEl.checked = true;
+        }
+
+        // Pre-select answer
+        if (saved.answer) {
+            const ansEl = document.querySelector(`input[name="answer"][value="${saved.answer}"]`);
+            if (ansEl) ansEl.checked = true;
+
+            // Show concealment block if answer was 'unknown'
+            if (saved.answer === 'unknown') {
+                document.getElementById('concealment-block').style.display = 'block';
+            }
+        }
+
+        // Pre-select concealment
+        if (saved.concealment !== null) {
+            const conEl = document.querySelector(`input[name="concealment"][value="${saved.concealment ? 'yes' : 'no'}"]`);
+            if (conEl) conEl.checked = true;
+        }
     }
 }
 
-function findSectionEndIndices() {
-    sections.forEach((section, idx) => {
-        let lastIndex;
-        if (idx < sections.length - 1) {
-            lastIndex = screens.findIndex(s => s.type === 'fazit' && s.section === section.name);
-        } else {
-            lastIndex = screens.length - 2; // letzter Fragen-Screen vor Ergebnis
-        }
-        sectionEndIndices[section.name] = lastIndex;
-    });
+function saveAnswer(answerObj) {
+    answers[currentStep] = answerObj;
 }
-
 
 function next() {
     if (currentStep < screens.length - 1) {
