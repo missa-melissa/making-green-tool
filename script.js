@@ -39,6 +39,15 @@ fireFrames[2].src = "images/fire2.png";
 let questionSubStep = 0;
 let currentQuestionState = {};
 
+let totalScore = 0;
+let maxTotalScore = 0;
+let ecoScore = 0;
+let maxEcoScore = 0;
+let socialScore = 0;
+let maxSocialScore = 0;
+let economyScore = 0;
+let maxEconomyScore = 0;
+
 
 // === Screens aufbauen ===
 function buildScreens() {
@@ -120,19 +129,38 @@ function render() {
     setTimeout(() => {
         content.innerHTML = '';
         const screen = screens[currentStep];
+        const plantContainers = document.querySelectorAll('.plant-container');
 
         // === Pflanzenbilder und Feuer pro Pflanze ===
         sections.forEach((section, idx) => {
             const name = section.name;
             let img;
-            if (currentStep <= sectionEndIndices[name]) {
-                img = `images/plant${idx + 1}_blooms.png`;
-            } else {
-                img = `images/plant${idx + 1}_died.PNG`;
+            calculatePartialResults();
+
+            let scorePercent;
+            if (name === 'Ökologie') {
+                scorePercent = safePercent(ecoScore, maxEcoScore);
+            } else if (name === 'Soziales') {
+                scorePercent = safePercent(socialScore, maxSocialScore);
+            } else if (name === 'Ökonomie') {
+                scorePercent = safePercent(economyScore, maxEconomyScore);
             }
+
+            if (currentStep > sectionEndIndices[name]) {
+                if (scorePercent > 60) {
+                    img = `images/plant${idx + 1}_blooms.png`;
+                } else {
+                    img = `images/plant${idx + 1}_died.PNG`;
+                }
+
+            } else {
+                img = `images/plant${idx + 1}_blooms.png`;
+                // img = `images/plant${idx + 1}_neutral.png`;
+            }
+
             plantImages[name].src = img;
 
-            if (screen.type === 'fazit' && screen.section === name) {
+            if (screen.type === 'fazit' && screen.section === name && scorePercent <= 60) {
                 fires[name].style.display = 'block';
                 startFireAnimation(name);
             } else {
@@ -143,45 +171,181 @@ function render() {
 
         // === Screens ===
         if (screen.type === 'intro') {
+            plantContainers.forEach(pc => pc.classList.add('hidden'));
             content.innerHTML = `
                 <h1>Willkommen zum Nachhaltigkeitsfragebogen</h1>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                  <p>
+                    Für eine fundierte Bewertung der Nachhaltigkeit eines Produkts ist es wichtig,
+                    sämtliche Stufen der Lieferkette zu betrachten. Dabei sind ökologische, soziale
+                    und ökonomische Aspekte sowohl in ihren positiven als auch negativen Ausprägungen
+                    zu berücksichtigen.
+                  </p>
+                  <p>
+                    Zur eigenständigen Beurteilung der relevanten Einflussfaktoren können die
+                    nachfolgenden Fragen als Orientierung dienen. Bitte beantworte jede Frage
+                    nach sorgfältiger Recherche mit „Ja“ oder „Nein“.
+                  </p>
+                  <p>
+                    Falls eine Frage auf das betrachtete Produkt thematisch nicht zutrifft, kann
+                    ihre Relevanz auf 0 gesetzt werden, sodass sie nicht in die Bewertung einfließt.
+                    Für alle zutreffenden Fragen ist eine Relevanzeinschätzung auf einer Skala von
+                    1 bis 3 vorzunehmen. Diese basiert auf der individuellen Einschätzung der
+                    Bedeutung der jeweiligen Frage für die Nachhaltigkeit des Produkts.
+                  </p>
+                  <p>
+                    Wenn eine Frage grundsätzlich relevant ist, jedoch keine verlässlichen
+                    Informationen dazu auffindbar sind, ist die Option „Keine Aussage“ zu wählen.
+                    Im Anschluss ist zu beurteilen, ob davon auszugehen ist, dass die fehlende
+                    Information durch das Unternehmen bewusst verschleiert wurde.
+                  </p>
+                  <p>
+                    Ein Fortschrittsindikator, dargestellt durch den Teddybär im Boot, zeigt an,
+                    wie viele Fragen noch offen sind. Nach Abschluss aller Bewertungen wird das
+                    Ergebnis der Nachhaltigkeitsanalyse in Form eines Punktwerts sowie als
+                    prozentualer Wert dargestellt.
+                  </p>
                 <button class="button" id="start">Start</button>
             `;
             document.getElementById('start').onclick = () => next();
         } else if (screen.type === 'question') {
+            plantContainers.forEach(pc => pc.classList.remove('hidden'));
             renderQuestionScreen(screen);
         } else if (screen.type === 'fazit') {
+
+            // Wähle passenden Text je nach Abschnitt
+            let fazitText = '';
+            if (screen.section === 'Ökologie') {
+                fazitText = 'Das erste Thema <strong>Ökologie</strong> ist nun geschafft. Es folgen nun die Themen <strong>Soziales</strong> und <strong>Ökonomie</strong>.';
+            } else if (screen.section === 'Soziales') {
+                fazitText = 'Das zweite Thema <strong>Soziales</strong> ist nun geschafft. Es folgt das Thema <strong>Ökonomie</strong>.';
+            } else if (screen.section === 'Ökonomie') {
+                fazitText = 'Das dritte Thema <strong>Ökonomie</strong> ist nun geschafft. Es folgt nun die <strong>Gesamtbewertung</strong>.';
+            } else {
+                fazitText = 'Zwischenfazit';
+            }
+
             content.innerHTML = `
-                <h2>Zwischenfazit – ${screen.section}</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-                <div>
-                    ${currentStep > 0 ? '<button class="button" id="back">Zurück</button>' : ''}
-                    <button class="button" id="next">Weiter</button>
-                </div>
-            `;
+        ${renderCategoryNav(screen.section)}
+        <p>${fazitText}</p>
+        <div>
+            ${currentStep > 0 ? '<button class="button" id="back">Zurück</button>' : ''}
+            <button class="button" id="next">Weiter</button>
+        </div>
+    `;
+
             document.getElementById('next').onclick = () => next();
             if (document.getElementById('back'))
                 document.getElementById('back').onclick = () => back();
+
         } else if (screen.type === 'result') {
-            let totalPossible = 0;
-            let totalEarned = 0;
-            answers.forEach(a => {
-                totalPossible += a.pointsPossible;
-                totalEarned += a.pointsEarned;
-            });
-            const percent = totalPossible > 0 ? ((totalEarned / totalPossible) * 100).toFixed(1) : 0;
-            content.innerHTML = `
-                <h1>Ergebnis</h1>
-                <p>Erreichte Punkte: ${totalEarned} von ${totalPossible}</p>
-                <p>Score: ${percent}%</p>
-            `;
+            renderResultScreen();
         }
 
         content.classList.add('show');
         updateBootPosition();
     }, 100);
 }
+
+function renderCategoryNav(activeSection) {
+    const sections = ['Ökologie', 'Soziales', 'Ökonomie'];
+    return `
+    <div class="category-nav">
+      ${sections.map(section => `
+        <span class="${section === activeSection ? 'active' : ''}">${section}</span>
+      `).join('')}
+    </div>
+  `;
+}
+
+
+function renderResultScreen() {
+    const progressContainer = document.querySelector('.progress-container');
+    progressContainer.classList.add('hidden');
+    document.body.classList.add('no-background');
+
+    const percent = safePercent(totalScore, maxTotalScore);
+    const teddyImage = getTeddyImageForScore(percent);
+
+
+    content.innerHTML = `
+        <h2>Ergebnis</h2>
+        <div class="result-intro">
+          <div class="result-text">
+            <p>Das Ergebnis spiegelt die Nachhaltigkeit des analysierten Produkts wider und basiert auf den gegebenen Antworten.</p>
+            <p>Die Bewertung wird in drei Kategorien unterteilt: Ein Ergebnis im Bereich von 0 % bis 33 % wird der roten Kategorie (schlecht) zugeordnet, ein Ergebnis zwischen 33% und 66% der gelben Kategorie (zufriedenstellend), und ein Ergebnis von 66% bis 100% der grünen Kategorie (gut).</p>
+          </div>
+          <div class="teddy-result">
+            <img src="${teddyImage}" alt="Teddy" class="teddy-image">
+          </div>
+        </div>
+        <div id="results">
+            ${renderResultBar("Gesamtbewertung", totalScore, maxTotalScore, "large")}
+            ${renderResultBar("Ökologie", ecoScore, maxEcoScore, "small")}
+            ${renderResultBar("Soziales", socialScore, maxSocialScore, "small")}
+            ${renderResultBar("Ökonomie", economyScore, maxEconomyScore, "small")}
+        </div>
+    `;
+    positionMarkers();
+}
+
+function getTeddyImageForScore(percent) {
+    if (percent <= 33) {
+        return 'images/teddy_sad.png';
+    } else if (percent <= 66) {
+        return 'images/teddy_okay.png';
+    } else {
+        return 'images/teddy_happy.png';
+    }
+}
+
+
+function renderResultBar(title, score, maxScore, sizeClass) {
+    const percent = safePercent(score, maxScore);
+    return `
+        <div class="result-bar ${sizeClass}">
+            <div class="bar-info">
+                <span class="bar-title">${title}: ${percent}% (${score} von ${maxScore} Punkten)</span>
+            </div>
+            <div class="bar-track">
+                <div class="bar-segment red"></div>
+                <div class="bar-segment yellow"></div>
+                <div class="bar-segment green"></div>
+                <div class="bar-marker">
+                    <div class="marker-line"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function safePercent(value, max) {
+    if (max === 0) return 0;
+    return Math.round((value / max) * 100);
+}
+
+function positionMarkers() {
+    const bars = document.querySelectorAll('.result-bar');
+
+    bars.forEach(bar => {
+        const titleText = bar.querySelector('.bar-title').textContent;
+        let match = titleText.match(/(\d+)%/);
+        let percent = match ? parseInt(match[1]) : 0;
+
+        const track = bar.querySelector('.bar-track');
+        const marker = bar.querySelector('.bar-marker');
+
+        const trackWidth = track.offsetWidth;
+        let markerLeft = Math.min(Math.max((percent / 100) * trackWidth, 0), trackWidth);
+
+        if (percent >= 100) {
+            markerLeft -= 4;
+        }
+
+        marker.style.left = `${markerLeft}px`;
+    });
+}
+
+
 
 function updateBootPosition() {
     const total = screens.length - 1;
@@ -194,9 +358,8 @@ function updateBootPosition() {
 
 function renderQuestionScreen(screen) {
     content.innerHTML = `
-    <h2>${screen.section}</h2>
+    ${renderCategoryNav(screen.section)}
     <p class="question-text">${screen.text}</p>
-    
     <div class="importance-question">
       <p><strong>Wie relevant ist diese Frage?</strong></p>
       <div class="likert-bar">
@@ -357,15 +520,78 @@ function renderQuestionScreen(screen) {
     }
 }
 
+function calculatePartialResults() {
+    ecoScore = 0;
+    maxEcoScore = 0;
+    socialScore = 0;
+    maxSocialScore = 0;
+    economyScore = 0;
+    maxEconomyScore = 0;
+
+    screens.forEach((screen, idx) => {
+        if (idx >= currentStep) return;
+        if (screen.type !== 'question') return;
+
+        const ans = answers[idx];
+        if (!ans) return;
+
+        if (screen.section === 'Ökologie') {
+            ecoScore += ans.pointsEarned;
+            maxEcoScore += ans.pointsPossible;
+        } else if (screen.section === 'Soziales') {
+            socialScore += ans.pointsEarned;
+            maxSocialScore += ans.pointsPossible;
+        } else if (screen.section === 'Ökonomie') {
+            economyScore += ans.pointsEarned;
+            maxEconomyScore += ans.pointsPossible;
+        }
+    });
+}
+
+
+function calculateResults() {
+    totalScore = 0;
+    maxTotalScore = 0;
+    ecoScore = 0;
+    maxEcoScore = 0;
+    socialScore = 0;
+    maxSocialScore = 0;
+    economyScore = 0;
+    maxEconomyScore = 0;
+
+    screens.forEach((screen, idx) => {
+        if (screen.type !== 'question') return;
+
+        const ans = answers[idx];
+        if (!ans) return;
+
+        totalScore += ans.pointsEarned;
+        maxTotalScore += ans.pointsPossible;
+
+        if (screen.section === 'Ökologie') {
+            ecoScore += ans.pointsEarned;
+            maxEcoScore += ans.pointsPossible;
+        } else if (screen.section === 'Soziales') {
+            socialScore += ans.pointsEarned;
+            maxSocialScore += ans.pointsPossible;
+        } else if (screen.section === 'Ökonomie') {
+            economyScore += ans.pointsEarned;
+            maxEconomyScore += ans.pointsPossible;
+        }
+    });
+}
+
+
 function saveAnswer(answerObj) {
     answers[currentStep] = answerObj;
 }
 
 function next() {
-    if (currentStep < screens.length - 1) {
-        currentStep++;
-        render();
+    currentStep++;
+    if (screens[currentStep]?.type === 'result') {
+        calculateResults();
     }
+    render();
 }
 
 function back() {
