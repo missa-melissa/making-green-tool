@@ -130,6 +130,14 @@ function render() {
         content.innerHTML = '';
         const screen = screens[currentStep];
         const plantContainers = document.querySelectorAll('.plant-container');
+        const app = document.getElementById('app');
+
+        if (screen.type === 'intro') {
+            app.style.backgroundColor = 'rgba(252, 249, 236, 1)';
+        } else {
+            app.style.backgroundColor = 'rgba(252, 246, 222, 0.95)'; // zurücksetzen
+        }
+
 
         // === Pflanzenbilder und Feuer pro Pflanze ===
         sections.forEach((section, idx) => {
@@ -154,11 +162,16 @@ function render() {
                 }
 
             } else {
-                img = `images/plant${idx + 1}_blooms.png`;
-                // img = `images/plant${idx + 1}_neutral.png`;
+                img = `images/plant${idx + 1}_neutral.png`;
             }
 
             plantImages[name].src = img;
+
+            if (img.includes('_died')) {
+                plantImages[name].classList.add('dead-plant');
+            } else {
+                plantImages[name].classList.remove('dead-plant');
+            }
 
             if (screen.type === 'fazit' && screen.section === name && scorePercent <= 60) {
                 fires[name].style.display = 'block';

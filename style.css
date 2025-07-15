@@ -130,7 +130,7 @@ p {
 
 .plant-container {
     position: absolute;
-    bottom: 0;
+    bottom: 12px;
     transition: left 0.8s ease;
     width: 100px;
     height: 200px;
@@ -143,9 +143,13 @@ p {
     display: block;
 }
 
+.plant.dead-plant {
+    margin-top: 40px;
+}
+
 .fire {
     position: absolute;
-    top: 0;
+    top: 40px;
     left: 0;
     width: 100%;
     display: none;
