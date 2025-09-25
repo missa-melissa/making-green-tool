@@ -34,7 +34,7 @@ const fireFrames = {
 };
 
 fireFrames[1].src = "images/fire1.PNG";
-fireFrames[2].src = "images/fire2.png";
+fireFrames[2].src = "images/fire2.PNG";
 
 let questionSubStep = 0;
 let currentQuestionState = {};
@@ -156,13 +156,13 @@ function render() {
 
             if (currentStep > sectionEndIndices[name]) {
                 if (scorePercent > 60) {
-                    img = `images/plant${idx + 1}_blooms.png`;
+                    img = `images/plant${idx + 1}_blooms.PNG`;
                 } else {
                     img = `images/plant${idx + 1}_died.PNG`;
                 }
 
             } else {
-                img = `images/plant${idx + 1}_neutral.png`;
+                img = `images/plant${idx + 1}_neutral.PNG`;
             }
 
             plantImages[name].src = img;
@@ -303,11 +303,11 @@ function renderResultScreen() {
 
 function getTeddyImageForScore(percent) {
     if (percent <= 33) {
-        return 'images/teddy_sad.png';
+        return 'images/teddy_sad.PNG';
     } else if (percent <= 66) {
-        return 'images/teddy_okay.png';
+        return 'images/teddy_okay.PNG';
     } else {
-        return 'images/teddy_happy.png';
+        return 'images/teddy_happy.PNG';
     }
 }
 
